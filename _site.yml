@@ -1,0 +1,9 @@
+name: "curso-r"
+navbar:
+  title: "Curso R"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Introdução"
+      href: 1_basico.html
+output_dir: "."

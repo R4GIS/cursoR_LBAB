@@ -1,0 +1,454 @@
+---
+title: "Introdução"
+---
+
+# Sobre o R
+
+O R é um software open-source mantido por um grupo de voluntários de vários países, o R-core team. No site oficial do [projeto](https://www.r-project.org/) a primeira descrição sobre ele é a seguinte:
+
+> O R é uma linguagem e ambiente para computação estatística e gráficos.
+
+Esse grupo mantem o sistema base que possibilita a interação com a linguagem R para computação numérica, manipulação de dados, gráficos e uma variedade de outras tarefas. No R, tudo o que acontece é o resultado de uma função. Eu, você e tantos outros usuários podemos desenvolver funções para facilitar a nossa vida e posteriormente organizá-las em pacotes (ou *packages*) e disponibilizar para todo o mundo.
+
+O projeto do R teve início com Ross Ihaka e Robert Gentleman nos anos 90 a partir de uma implementação da linguagem S, que foi desenvolvida anos antes por um grupo de pesquisadores liderados por John Chambers no Bell Laboratories. Desde então, o R tem crescido em um ritmo absurdo e pode ser considerado o principal software livre para programação estatística e um dos mais usados no mundo. Não vou listar todas potencialidades do R aqui neste post, em primeiro lugar por que eu não domino todas elas, e segundo por que com certeza o post ficaria muito grande :P. Com o tempo vou apresentar nos posts algumas aplicações pontuais do R com relação aos problemas que precisei resolver. Mas já adianto, é comum dizermos que a pergunta certa sobre uma tarefa no R não é *se podemos fazer*, mas sim *como* podemos fazer.
+
+# Download do R
+
+O download do software R pode ser feito no site do [CRAN](https://www.r-project.org/). Após a instalação você já está apto para iniciar sua análise.
+
+# Download do RStudio
+
+Para trabalharmos em um ambiente com maiores funcionalidade, podemos optar por utilizar um ambiente de desenvolvimento integrado ao R. O [RStudio](https://www.rstudio.com/) é um dos mais utilizados e possui diversas funcionalidades que facilitam nossa vida durante uma análise.
+
+Faça o download do RStudio nesse [link](https://www.rstudio.com/products/rstudio/download/). Note que o Rstudio não irá funcionar se você não tiver instalado o R antes.
+
+
+# Operações basicas
+
+```{r}
+10 + 2 - 3 
+```
+
+```{r}
+50 * 10
+```
+
+```{r}
+40 / 3
+```
+
+```{r}
+5^2
+```
+
+```{r}
+64^(1/2)
+```
+
+```{r}
+sqrt(64)
+```
+
+```{r}
+4^-1
+```
+
+```{r}
+log(10)
+```
+
+```{r}
+exp(x = 1)
+```
+
+```{r}
+x <- "28-07-2016"
+
+x
+```
+
+```{r}
+class(x)
+```
+
+```{r warning=FALSE}
+#install.packages(libridate)
+library(lubridate)
+
+x2 <- dmy(x)
+
+x2
+```
+
+```{r}
+class(x2)
+```
+
+```{r}
+ymd("20110604")
+```
+
+```{r}
+mdy("06-04-2011")
+```
+
+```{r}
+x <- ymd_hms("2016-07-28 12:30:20", tz = "America/Sao_Paulo")
+
+x
+```
+
+```{r}
+year(x)
+```
+
+```{r}
+month(x)
+```
+
+# Comandos básicos
+
+```{r}
+seq(from = 1, to = 100, by =  10)
+```
+
+```{r}
+1:100
+```
+
+```{r}
+rep(x = 1:10, each = 2)
+```
+
+```{r}
+paste("abc", "def", sep = "-")
+```
+```{r}
+x <- 1
+
+ifelse(test = x > 5, yes = "Maior que 5", no = "Menor que 5")
+```
+```{r}
+x <- 15:200
+
+max(x)
+```
+
+```{r}
+min(x)
+```
+
+```{r}
+mean(x)
+```
+
+```{r}
+median(x)
+```
+
+
+# Estrutura dos dados
+
+Como em qualquer outra linguagem de programação, o R tem em sua concepção tipos e estruturas de dados que determinam como será o comportamento durante os processos. Os tipos de dados são estes: 
+
+|    | Homogêneo     | Heterogêneo   |
+|----|---------------|---------------|
+| 1d | Atomic vector | List          |
+| 2d | Matrix        | Data frame    |
+| nd | Array         |               |
+
+É importante entender a diferença entre estes tipo de objetos pois cada um dele tem um comportamento diferente e exigem tipos específicos de elementos.
+
+
+## Atomic Vectors
+
+Um vetor aceita 4 tipos de elementos: integer, double, character e logical. Teste o código abaixo atribuindo elementos aos objetos.
+
+```{r}
+x <- 1
+
+typeof(x)
+```
+
+```{r}
+x <- 1L
+
+typeof(x)
+```
+
+```{r}
+x <- 2.333
+
+typeof(x)
+```
+
+```{r}
+x <- "a"
+
+typeof(x)
+```
+
+```{r}
+x <- TRUE
+
+typeof(x)
+```
+
+```{r}
+x <- c("a", "b", "c", "d")
+
+typeof(x)
+```
+
+Por que isso é importante? Cada função é desenhada para trabalhar com um certo tipo de objeto e elementos. Veja os exemplos abaixo.
+
+```{r}
+x <- c(1, 5, 10, 15)
+
+x
+```
+
+```{r}
+mean(x)
+```
+
+```{r}
+x <- c(1, 5, 10, "15")
+
+x
+```
+
+```{r}
+mean(x)
+```
+
+```{r}
+x <- as.numeric(c(1, 5, 10, "15"))
+
+x
+```
+
+```{r}
+mean(x)
+```
+
+## Lists
+
+As listas são vetores com flexibilidade quanto ao tipo do elemento. Para criá-la basta usar `list()` ao invés de `c()`.
+
+```{r}
+x <- list(1:3, "a", c(TRUE, FALSE, TRUE), c(2.3, 5.9))
+
+x
+```
+
+```{r}
+str(x)
+```
+
+
+## Matrices and arrays
+
+Se acrescentarmos mais dimensões aos vetores teremos matrizes (2d) e arrays (ou arranjos) para várias dimensões.
+
+```{r}
+x <- matrix(data = 1:6, ncol = 3, nrow = 2)
+
+x
+```
+
+```{r}
+typeof(x)
+```
+
+```{r}
+class(x)
+```
+
+```{r}
+x <- array(data = 1:18, dim = c(2, 3, 3))
+
+x
+```
+
+```{r}
+typeof(x)
+```
+
+```{r}
+class(x)
+```
+
+```{r}
+x <- list(1:3, "a", TRUE, 1.0, matrix(1:6, ncol = 3, nrow = 2))
+
+x
+```
+
+```{r}
+typeof(x)
+```
+
+```{r}
+class(x)
+```
+
+
+## Data frames
+
+Objetos do tipo Data frame são os mais comuns quando estamos trabalhando no R. Você pode entender um data frame como um conjunto de vetores, ou como uma matriz com maior flexibilidade.
+
+```{r}
+x <- 1:10
+
+y <- c("a", "b")
+```
+
+```{r}
+df <- data.frame(x, y)
+
+df
+```
+
+```{r}
+str(df)
+```
+
+```{r}
+df2 <- cbind(df, z = 21:30)
+
+df3 <- rbind(df2, c(100, "a", 200))
+
+df3
+```
+
+
+# Subsetting
+
+O acesso ao elemento armazenado em um objeto pode ser feito com 3 operadores: `$`, `[` e `[[`.
+
+## Vetores
+
+```{r}
+x <- c(5.4, 6.2, 7.1, 4.8)
+
+x[2]
+```
+
+```{r}
+x[c(2,3)]
+```
+
+```{r}
+x[c(2,2)]
+```
+
+```{r}
+x[-1]
+```
+
+```{r}
+x[-c(1, 2, 3)]
+```
+
+## Operador lógico
+
+```{r}
+x[c(TRUE, TRUE, FALSE, FALSE)]
+```
+
+```{r}
+x[x > 6]
+```
+
+```{r}
+x <- c("a", "b", "c", "d", "e", "f", "g")
+
+x
+```
+```{r}
+x %in% c("a", "d", "g")
+```
+
+
+## Listas
+
+```{r}
+x <- list(vetor = 1:3, letra = "a", logico = c(TRUE, FALSE, TRUE))
+
+x
+```
+
+```{r}
+x$vetor
+```
+
+```{r}
+x[1]
+```
+
+```{r}
+x[[1]]
+```
+
+## Matrizes
+
+```{r}
+x <- matrix(1:6, ncol = 3, nrow = 2)
+
+x
+```
+
+```{r}
+colnames(x) <- c("A", "B", "C")
+x
+```
+
+```{r}
+x[ ,3]
+```
+
+```{r}
+x[1, ]
+```
+
+```{r}
+x[ , "A"]
+```
+
+```{r}
+x[c(TRUE, FALSE), ]
+```
+
+```{r}
+x[, -2]
+```
+
+
+## Data frames
+
+```{r}
+df <- data.frame(x = 1:3, y = 3:1, z = letters[1:3])
+
+df$x
+```
+
+```{r}
+df[ , 2]
+```
+
+```{r}
+df[ , "y"]
+```
+
+```{r}
+df[c(1,2), ]
+```
+
+```{r}
+df[df$x == 2, ]
+```
+
+```{r}
+dim(df)
+```

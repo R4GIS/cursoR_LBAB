@@ -1,0 +1,437 @@
+---
+title: "Visualização"
+---
+
+```{r}
+library(pacman)
+p_load(readr, readxl, dplyr, tidyr, lubridate, ggplot2, ggthemes)
+```
+
+
+# Pontos
+
+```{r}
+padrao <- read_csv2("dados/absorbancia_padrao.csv")
+
+padrao
+```
+
+```{r}
+leitura <- read_csv2("./dados/absorbancia_leitura.csv")
+
+leitura
+```
+
+```{r}
+ggplot(padrao, aes(absorbancia, concentracao)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  facet_wrap(~grupo)
+```
+
+
+# Linhas
+
+```{r}
+carne <- read_csv2("./dados/carne.csv")
+
+carne_t1 <- carne %>% 
+  gather(ano, ton, 2:12) %>% 
+  mutate(ano = ymd(paste(ano, 01, 01, sep = "-")))
+
+carne_t1
+```
+
+```{r eval=FALSE}
+# alternativa flexivel
+carne %>% 
+  gather(ano, ton, 2:dim(.)[2])
+
+# ou ainda 2:dim(.)
+carne %>% 
+  gather(ano, ton, -tipo)
+```
+
+```{r}
+carne_t1 %>%
+  ggplot(aes(ano, ton, fill = tipo)) +
+    geom_area()
+```
+
+```{r}
+carne_t2 <- carne_t1 %>% 
+  spread(tipo, ton) %>% 
+  mutate(consumo = importacao + producao - exportacao)
+
+carne_t2
+```
+
+```{r}
+ggplot() +
+  geom_line(data = carne_t2, aes(ano, consumo)) +
+  geom_line(data = carne_t2, aes(ano, producao))
+```
+
+```{r}
+carne_t3 <- carne_t2 %>%
+  select(ano, producao, consumo) %>% 
+  gather(tipo, ton, -ano)
+
+carne_t3
+```
+
+```{r}
+carne_t3 %>% 
+  ggplot(aes(ano, ton, fill = tipo)) +
+    geom_line()
+```
+
+```{r}
+cafe <- read_csv2("./dados/cafe.csv")
+```
+
+```{r}
+cafe_t1 <- cafe %>% 
+  gather(tipo, ton, arabica, robusta, dcaf, conab) %>% 
+  mutate(estoque = ifelse(tipo %in% c("arabica", "robusta"), "privado", "governo"))
+
+cafe_t1
+```
+```{r}
+cafe_t1 %>% 
+  ggplot(aes(ano, ton, color = tipo)) +
+    geom_line()
+```
+
+```{r}
+cafe_t1 %>% 
+  ggplot(aes(ano, ton, color = tipo)) +
+    geom_line() +
+    facet_wrap(~estoque, nrow = 2)
+```
+
+
+# Boxplot
+
+```{r}
+dados <- read_csv2("./dados/base_vespa.csv")
+
+dados
+```
+
+```{r}
+total <- dados %>%
+  filter(Coleta == 5) %>%
+  group_by(Tratamento, Individuo) %>%
+  summarise(Galhas = sum(Galhas, na.rm=T)) %>%
+  mutate(Galhas = replace(Galhas, Galhas == 0, NA))
+
+total
+```
+
+```{r}
+ggplot(total, aes("Total", Galhas)) +
+  geom_boxplot() +
+  theme_few()
+```
+
+```{r}
+ggplot(total, aes(Tratamento, Galhas)) +
+  geom_boxplot() +
+  theme_few()
+```
+
+```{r}
+local <- dados %>%
+  filter(Coleta == 5) %>%
+  group_by(Tratamento, Individuo, Local) %>%
+  summarise(Galhas = sum(Galhas, na.rm=T)) %>%
+  mutate(Galhas = replace(Galhas, Galhas == 0, NA))
+
+local
+```
+
+```{r}
+  ggplot(local, aes(Tratamento, Galhas, fill = Local)) +
+  geom_boxplot() +
+  theme_few() +
+  scale_fill_brewer(palette = "Spectral")
+```
+
+```{r}
+total_coleta <- dados %>%
+  filter(Coleta != 1 ) %>%
+  group_by(Tratamento, Coleta, Individuo) %>%
+  summarise(Galhas = sum(Galhas, na.rm=T)) %>%
+  mutate(Galhas = replace(Galhas, Galhas == 0, NA))
+
+total_coleta
+```
+
+```{r}
+ggplot(total_coleta, aes(Tratamento, Galhas)) +
+  geom_boxplot() +
+  #geom_jitter(alpha = 0.4) +
+  facet_wrap(~ Coleta, labeller = label_both) +
+  theme_few() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+```
+
+
+# Gráfico de barras
+
+```{r}
+# seleciona apenas as Coletas de numero 5, em seguida monta um fator de 
+# agrupamento em função de Tratamento. Aplica a soma de todas as
+# observações (Galhas) de acordo com o fator de agrupamento.
+
+total_trat <- dados %>%
+  filter(Coleta == 5) %>%
+  group_by(Tratamento) %>%
+  summarise(Galhas = sum(Galhas, na.rm=T))
+
+total_trat
+```
+
+```{r}
+ggplot(total_trat, aes(Tratamento, Galhas)) +
+  geom_bar(stat = "identity") +
+  theme_few()
+```
+
+```{r}
+total_trat_local <- dados %>%
+  filter(Coleta == 5) %>%
+  group_by(Tratamento, Local) %>%
+  summarise(Galhas = sum(Galhas, na.rm=T))
+
+total_trat_local
+```
+
+```{r}
+ggplot(total_trat_local, aes(Tratamento, Galhas, fill = Local)) +
+  geom_bar(stat = "identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Spectral")
+```
+
+```{r}
+ggplot(total_trat_local, aes(Tratamento, Galhas, fill = Local)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_few() +
+  scale_fill_brewer(palette = "Spectral")
+```
+
+```{r}
+ggplot(total_trat_local, aes(Tratamento, Galhas )) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~Local) +
+  theme_few() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+```
+
+```{r}
+ggplot(total_trat, aes(Tratamento, Galhas)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = Galhas), vjust = -0.2) +
+  theme_few()
+```
+
+```{r}
+# Cria uma nova coluna que contem a posição no eixo y que corresponde ao centro
+# da barra. Esta posição correnponde ao local onde o label de cada barra
+# será mostrado
+
+total_trat_local_y <- total_trat_local %>%
+  mutate(Galhas_y = replace(cumsum(Galhas) - (0.5*Galhas),
+    Galhas  ==  0, NA))
+
+ggplot(total_trat_local_y, aes(Tratamento, Galhas, fill = Local)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = Galhas, y = Galhas_y)) +
+  theme_few() +
+  scale_fill_brewer(palette = "Spectral")
+```
+
+```{r}
+ggplot(total_trat_local, aes(Tratamento, Galhas, fill = Local)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = Galhas),
+    position = position_dodge(width=0.9), vjust = -0.2) +
+  theme_few() +
+  scale_fill_brewer(palette = "Spectral")
+```
+
+```{r 5_bar_local_facet_annot}
+ggplot(total_trat_local, aes(Tratamento, Galhas )) +
+  geom_bar(stat = "identity", position = "dodge") +
+    geom_text(aes(label = Galhas), vjust = -0.2) +
+  facet_wrap(~Local) +
+  theme_few() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+```
+
+
+```{r media_trat_desv}
+# Seleciona apenas as Coletas de numero 5, em seguida calcula a média e o
+# desvio padrão de cada Tratamento.
+
+media_trat_desv <- dados %>%
+  filter(Coleta == 5) %>%
+  group_by(Tratamento) %>%
+  summarise(desv = sd(Galhas, na.rm=T)/sqrt(n()),
+    Galhas = mean(Galhas, na.rm=T))
+
+media_trat_desv
+```
+
+```{r 5_bar_basico_desv}
+ggplot(media_trat_desv, aes(Tratamento, Galhas)) +
+  geom_bar(stat = "identity") +
+  geom_errorbar(aes(ymin = Galhas - desv,
+     ymax = Galhas + desv), width = 0.4) +
+  theme_few()
+```
+
+```{r total_trat_local_desv}
+# Seleciona apenas as Coletas de numero 5, em seguida calcula a mediana e o
+# desvio padrão em função de cada Trtatamento e Local.
+
+mediana_trat_local_desv <- dados %>%
+  filter(Coleta == 5) %>%
+  group_by(Tratamento, Local) %>%
+  summarise(desv = sd(Galhas, na.rm=T)/sqrt(n()),
+    Galhas = median(Galhas, na.rm=T))
+
+mediana_trat_local_desv
+```
+
+```{r 5_bar_local_dodge_desv}
+ggplot(mediana_trat_local_desv, aes(Tratamento, Galhas, fill = Local)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin = Galhas - desv, ymax = Galhas + desv),
+    position = position_dodge(width=0.9), width = 0.4) +
+  theme_few() +
+  scale_fill_brewer(palette = "Spectral")
+```
+
+```{r 5_bar_local_facet_desv}
+ggplot(mediana_trat_local_desv, aes(Tratamento, Galhas )) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin = Galhas - desv,
+    ymax = Galhas + desv), width = 0.4) +
+  facet_wrap(~Local) +
+  theme_few() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))
+```
+
+# Heatmap
+
+```{r}
+library(pacman)
+p_load(RCurl, readr, dplyr, ggplot2, ggthemes, viridis)
+```
+
+```{r}
+dados <-   read_csv2("./dados/tume0.csv")
+
+# Cria um fator com o atributo para a variável Esp que informa a ordem crescente
+# das espécies em função da altura dominante.
+
+dados <- dados %>% 
+  mutate(Esp = reorder(Esp, Hdom, function(x) max(x)),
+  Idade = round(I_meses/12,1))
+dados
+```
+
+```{r}
+ggplot(dados, aes(Idade, Hdom, color = Esp)) +
+  geom_line(size=1.5) +
+  labs(x = "Idade (anos)", y = "Altura dominante (m)") +
+  theme_few() +
+  scale_color_viridis(name = "Materiais genéticos",
+    direction = -1, discrete = T) +
+  guides(col = guide_legend(ncol = 1, reverse = TRUE))
+```
+
+```{r}
+ggplot(dados, aes(factor(Idade), Esp, fill = Hdom)) +
+  geom_tile() +
+  labs(x = "Idade (anos)", y = "Materiais genéticos") +
+  theme_few() +
+  scale_fill_viridis(name = "Altura dominante (m)", direction = -1) +
+  guides(col = guide_legend(reverse = TRUE))
+```
+
+```{r}
+ggplot(dados, aes(factor(Idade),
+       Esp, fill = cut(Hdom, breaks = seq(0, 40, 2)))) +
+ geom_tile() +
+ labs(x = "Idade (anos)", y = "Materiais genéticos") +
+ theme_few() +
+ scale_fill_viridis(name = "Altura dominante (m)",
+   discrete = T, direction = -1) +
+ guides(col = guide_legend(reverse = TRUE))
+```
+
+```{r}
+ggplot(dados, aes(factor(Idade),
+       Esp, fill = cut(Hdom, breaks = seq(0, 40, 2)))) +
+ geom_tile() +
+ geom_text(aes(label = Hdom), color = "white") +
+ labs(x = "Idade (anos)", y = "Materiais genéticos") +
+ theme_few() +
+ scale_fill_viridis(name = "Altura dominante (m)",
+   discrete = T, direction = -1) +
+ guides(col = guide_legend(reverse = TRUE))
+```
+
+
+# Histograma
+
+```{r}
+dados <- read_csv2("./dados/base_amazonia.csv")
+
+dados
+```
+
+```{r}
+ggplot(dados, aes(DAP)) +
+  geom_histogram(binwidth = 10, color = "white") +
+  labs(x = "Diâmetro (cm)", y = "Frequência (arv/ha)") +
+  scale_x_continuous(breaks = seq(0, 100,10)) +
+  theme_few()
+```
+
+```{r}
+ggplot(dados, aes(DAP, fill = Comercial)) +
+  geom_histogram(binwidth = 10, color = "white", alpha = 0.5) +
+  labs(x = "Diâmetro (cm)", y = "Frequência (arv/ha)") +
+  scale_x_continuous(breaks = seq(0, 100,10)) +
+  theme_few() +
+  theme(legend.position = c(.9, .9)) +
+  scale_fill_hue("Comercial?", labels = c("Não", "Sim"))
+```
+
+```{r}
+ggplot(dados, aes(Volume, fill = DAP > 50 & Comercial == "Sim")) +
+  geom_histogram(binwidth = 0.5, color = "white", alpha = 0.5) +
+  labs(x =  Volume~individual ~ (m^3 / arv), y = "Frequência (arv/ha)") +
+  scale_y_continuous(breaks = seq(0, 150, 20)) +
+  scale_x_continuous(breaks = seq(0, 10, 0.5)) +
+  theme_few()  +
+  theme(legend.position = c(.9, .9)) +
+  scale_fill_hue("Pode explorar?", labels = c("Não", "Sim"))
+```
+
+```{r}
+ggplot(dados, aes(Volume, fill = DAP > 50 & Comercial == "Sim")) +
+  geom_histogram(aes(y = ..count../sum(..count..)),
+    binwidth = 0.5, color = "white", alpha = 0.5) +
+  labs(x =  Volume~individual ~ (m^3 / arv), y = "Frequência (arv/ha)") +
+  scale_y_continuous(breaks = seq(0, .5, 0.05), labels = scales::percent) +
+  scale_x_continuous(breaks = seq(0, 10, 0.5)) +
+  theme_few()  +
+  theme(legend.position = c(.9, .9)) +
+  scale_fill_hue("Pode explorar?", labels = c("Não", "Sim"))
+```

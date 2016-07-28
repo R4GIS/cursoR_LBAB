@@ -1,1 +1,1 @@
-cursoR_LBAB
+cursoR

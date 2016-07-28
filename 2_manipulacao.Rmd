@@ -1,0 +1,212 @@
+---
+title: "Manipulação"
+---
+
+# Manipulação de data frame
+
+```{r}
+#install.packages("pacman")
+library(pacman)
+p_load(readr, readxl, dplyr, tidyr, lubridate, nycflights13)
+
+#?flights
+
+flights
+```
+
+
+# Filter
+
+Com a função `filter()` é possível selecionar linhas específicas, de acordo com o fator que deseja. Podem ser usados um ou vários fatores de seleção.
+
+```{r}
+filter(flights, month == 1, day == 1)
+```
+
+```{r}
+filter(flights, month == 11 | month == 12)
+```
+
+```{r}
+filter(flights, month %in% c(11, 12))
+```
+
+
+# Arrange
+
+Para ordenar as colunas, podemos usar a função `arrange()`. A hierarquia é dada pela sequência dos fatores que são adicionados como argumentos da função.
+
+```{r}
+arrange(flights, year, month, day)
+```
+
+```{r}
+arrange(flights, desc(arr_delay))
+```
+
+
+# Select
+
+A função `select()` auxilia-nos na seleção de variáveis (colunas). A sintaxe é muito ao usado com o operador ´[´.
+
+```{r}
+select(flights, year, month, day)
+```
+
+```{r}
+select(flights, year:day)
+```
+
+```{r}
+select(flights, -(year:day))
+```
+
+
+# Mutate
+
+Para criar novas variáveis, podemos usar a função `mutate()`. Um diferencial dessa função é que podemos utilizar variáveis criadas dentro do próprio comando. Se quisermos mostrar apenas as novas variáveis, podemos usar a função `transmute`.
+
+```{r}
+flights_sml <- select(flights, 
+  year:day, 
+  ends_with("delay"), 
+  distance, 
+  air_time)
+
+flights_sml
+```
+
+```{r}
+mutate(flights_sml,
+  speed = distance / air_time * 60,
+  hours = air_time / 60)
+```
+
+```{r}
+mutate(flights_sml,
+  gain = arr_delay - dep_delay,
+  hours = air_time / 60,
+  gain_per_hour = gain / hours
+)
+```
+
+```{r}
+transmute(flights,
+  gain = arr_delay - dep_delay,
+  hours = air_time / 60,
+  gain_per_hour = gain / hours
+)
+```
+
+
+# Summarise 
+
+A função `summarise` nos permite resumir dados. Também é possível resumir dados em função de vários fatores com o `group_by`.
+
+```{r}
+summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
+```
+
+```{r}
+by_day <- group_by(flights, year, month, day)
+summarise(by_day, delay = mean(dep_delay, na.rm = TRUE))
+```
+
+```{r}
+by_dest <- group_by(flights, dest)
+delay <- summarise(by_dest,
+  count = n(),
+  dist = mean(distance, na.rm = TRUE),
+  delay = mean(arr_delay, na.rm = TRUE))
+delay <- filter(delay, count > 20, dest != "HNL")
+delay
+```
+
+
+# Operador %>% 
+O pacote `dplyr` foi desenhado para trabalhar em conjunto que o operador em cadeia `%>%`. O que esse operador faz é aplicar o que está no LHS no primeiro parâmetro da função do RHS. Podemos também direcionar o local onde o conteúdo do LHS será aplicado informando um ´.´ como argumento.
+
+```{r}
+flights %>% 
+  group_by(dest) %>% 
+  summarise(count = n(),
+    dist = mean(distance, na.rm = TRUE),
+    delay = mean(arr_delay, na.rm = TRUE)) %>% 
+  filter(count > 20, dest != "HNL")
+```
+
+```{r}
+flights %>% 
+  group_by(year, month, day) %>% 
+  summarise(mean = mean(dep_delay))
+```
+
+```{r}
+flights %>% 
+  group_by(year, month, day) %>% 
+  summarise(mean = mean(dep_delay, na.rm = TRUE))
+```
+
+
+# Tidy data
+
+O conceito tidy data está muito bem descrito no [artigo de Hadley Wickham](https://www.jstatsoft.org/article/view/v059i10), onde ela apresenta o pacote [tidyr](https://cran.r-project.org/web/packages/tidyr/index.html) que contém uma gama de funções muito úteis para esse fim. Wickham também dedicou um capítulo específico sobre esse conceito em seu novo [livro](http://r4ds.had.co.nz/). Por tidy data, entendemos que:
+  
+* Variáveis estão dispostas em colunas.
+* Observações estão dispostas em linhas.
+* Os valores atribuídos às variáveis em cada observação formam a tabela.
+
+
+# Exemplo dados produção de carne
+
+```{r}
+carne <- read_csv2("dados/carne.csv")
+
+carne
+```
+
+```{r}
+carne_t1 <- carne %>% 
+  gather(ano, ton, 2:12) %>% 
+  mutate(ano = ymd(paste(ano, 01, 01, sep = "-")))
+
+carne_t1
+```
+
+```{r}
+# alternativa flexivel
+carne %>% 
+  gather(ano, ton, 2:dim(.)[2])
+```
+
+```{r}
+# ou ainda 2:dim(.)
+carne %>% 
+  gather(ano, ton, -tipo)
+```
+
+```{r}
+carne_t2 <- carne_t1 %>% 
+  spread(tipo, ton) %>% 
+  mutate(consumo = importacao + producao - exportacao)
+
+carne_t2
+```
+
+
+# Exemplo dados estoque de café
+
+```{r}
+cafe <- read_csv2("dados/cafe.csv")
+
+cafe %>% 
+  mutate(ano = ymd(paste(ano, 01, 01, sep = "-")))
+```
+
+```{r}
+cafe_t1 <- cafe %>% 
+  gather(tipo, ton, arabica, robusta, dcaf, conab) %>% 
+  mutate(estoque = ifelse(tipo %in% c("arabica", "robusta"), "privado", "governo"))
+
+cafe_t1
+```

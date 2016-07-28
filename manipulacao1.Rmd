@@ -1,0 +1,155 @@
+---
+title: "Curso R - Manipulação de dados 1"
+author: "Ítalo Cegatta"
+date: "3 de junho de 2016"
+output:
+  html_document:
+    keep_md: true
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(warning=FALSE, message=FALSE,
+  fig.width=10, fig.height=8, dpi=300, fig.path='imagens/')
+```
+
+# Manipulação de data frame
+
+```{r}
+#install.packages("pacman")
+library(pacman)
+p_load(readxl, dplyr, tidyr, nycflights13)
+
+#?flights
+
+flights
+```
+
+# Filter
+
+Com a função `filter()` é possível selecionar linhas específicas, de acordo com o fator que deseja. Podem ser usados um ou vários fatores de seleção.
+
+```{r}
+filter(flights, month == 1, day == 1)
+
+filter(flights, month == 11 | month == 12)
+
+filter(flights, month %in% c(11, 12))
+```
+
+# Arrange
+
+Para ordenar as colunas, podemos usar a função `arrange()`. A hierarquia é dada pela sequência dos fatores que são adicionados como argumentos da função.
+
+```{r}
+arrange(flights, year, month, day)
+
+arrange(flights, desc(arr_delay))
+```
+
+# Select
+
+A função `select()` auxilia-nos na seleção de variáveis (colunas). A sintaxe é muito ao usado com o operador ´[´.
+
+```{r}
+select(flights, year, month, day)
+
+select(flights, year:day)
+
+select(flights, -(year:day))
+```
+
+# Mutate
+
+Para criar novas variáveis, podemos usar a função `mutate()`. Um diferencial dessa função é que podemos utilizar variáveis criadas dentro do próprio comando. Se quisermos mostrar apenas as novas variáveis, podemos usar a função `transmute`.
+
+```{r}
+flights_sml <- select(flights, 
+  year:day, 
+  ends_with("delay"), 
+  distance, 
+  air_time)
+
+mutate(flights_sml,
+  speed = distance / air_time * 60,
+  hours = air_time / 60)
+
+mutate(flights_sml,
+  gain = arr_delay - dep_delay,
+  hours = air_time / 60,
+  gain_per_hour = gain / hours
+)
+
+transmute(flights,
+  gain = arr_delay - dep_delay,
+  hours = air_time / 60,
+  gain_per_hour = gain / hours
+)
+```
+
+# Summarise 
+
+A função `summarise` nos permite resumir dados. Também é possível resumir dados em função de vários fatores com o `group_by`.
+
+```{r}
+summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
+
+by_day <- group_by(flights, year, month, day)
+summarise(by_day, delay = mean(dep_delay, na.rm = TRUE))
+
+by_dest <- group_by(flights, dest)
+delay <- summarise(by_dest,
+  count = n(),
+  dist = mean(distance, na.rm = TRUE),
+  delay = mean(arr_delay, na.rm = TRUE))
+delay <- filter(delay, count > 20, dest != "HNL")
+delay
+```
+
+# Operador %>% 
+O pacote `dplyr` foi desenhado para trabalhar em conjunto que o operador em cadeia `%>%`. O que esse operador faz é aplicar o que está no LHS no primeiro parâmetro da função do RHS. Podemos também direcionar o local onde o conteúdo do LHS será aplicado informando um ´.´ como argumento.
+
+```{r}
+flights %>% 
+  group_by(dest) %>% 
+  summarise(count = n(),
+    dist = mean(distance, na.rm = TRUE),
+    delay = mean(arr_delay, na.rm = TRUE)) %>% 
+  filter(count > 20, dest != "HNL")
+
+flights %>% 
+  group_by(year, month, day) %>% 
+  summarise(mean = mean(dep_delay))
+
+flights %>% 
+  group_by(year, month, day) %>% 
+  summarise(mean = mean(dep_delay, na.rm = TRUE))
+```
+
+# Tidy data
+
+O conceito tidy data está muito bem descrito no [artigo de Hadley Wickham](https://www.jstatsoft.org/article/view/v059i10), onde ela apresenta o pacote [tidyr](https://cran.r-project.org/web/packages/tidyr/index.html) que contém uma gama de funções muito úteis para esse fim. Wickham também dedicou um capítulo específico sobre esse conceito em seu novo [livro](http://r4ds.had.co.nz/). Por tidy data, entendemos que:
+  
+* Variáveis estão dispostas em colunas.
+* Observações estão dispostas em linhas.
+* Os valores atribuídos às variáveis em cada observação formam a tabela.
+
+Agora vamos aplicar esse conceito neste [banco de dados]().
+
+```{r}
+#getwd()
+
+dados <- read_excel("base_vespa.xlsx")
+dados
+
+#dim(dados2)[2]
+dados <- gather(dados, "Local", "Galhas", 3:17)
+dados
+
+dados <- separate(dados, Local, c("Coleta", "Local"))
+dados
+
+dados <- read_excel("base_vespa.xlsx") %>% 
+  gather("Local", "Galhas", 3:17) %>% 
+  separate(Local, c("Coleta", "Local"))
+```
