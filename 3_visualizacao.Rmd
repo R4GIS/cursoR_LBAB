@@ -109,6 +109,19 @@ cafe_t1 %>%
     theme_bw()
 ```
 
+```{r}
+ferm <- read_csv2("dados/fermentacao.csv")
+
+ferm
+```
+
+```{r}
+ggplot(ferm, aes(dia, fermentacao, shape =composicao,  color = factor(repeticao))) +
+  geom_point() +
+  geom_line() +
+  theme_bw()
+```
+
 
 # Boxplot
 

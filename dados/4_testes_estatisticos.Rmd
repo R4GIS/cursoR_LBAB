@@ -1,0 +1,283 @@
+---
+title: "Testes Estatísticos"
+---
+
+```{r}
+pacman::p_load(readr, dplyr, tidyr, ggplot2, car, agricolae, ExpDes.pt)
+```
+
+# Ex - Curva padrão
+
+```{r setup}
+library(pacman)
+p_load(readr, dplyr, ggplot2, ggpmisc, broom, purrr, tidyr)
+```
+
+```{r}
+padrao <- read_csv2("dados/absorbancia_padrao.csv")
+
+padrao
+```
+
+```{r}
+leitura <- read_csv2("dados/absorbancia_leitura.csv")
+
+leitura
+```
+
+```{r}
+ggplot(padrao, aes(absorbancia, concentracao)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  stat_poly_eq(aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~~")), formula = y ~ x, parse = TRUE) +
+  facet_wrap(~grupo)
+```
+
+```{r}
+grupo1 <- lm(concentracao ~ absorbancia, data = filter(padrao, grupo == 1))
+
+glance(grupo1)
+```
+
+```{r}
+tidy(grupo1)
+```
+
+```{r}
+grupo2 <- lm(concentracao ~ absorbancia, data = filter(padrao, grupo == 2))
+
+glance(grupo2)
+```
+
+```{r}
+tidy(grupo2)
+```
+
+
+```{r}
+grupos <- padrao %>%
+  group_by(grupo) %>%
+  do(ajuste = lm(concentracao ~ absorbancia, data = .))
+ 
+grupos
+```
+
+```{r}
+grupos %>% glance(ajuste)
+```
+
+```{r}
+grupos %>% tidy(ajuste)
+```
+```{r}
+grupos %>%
+  augment(ajuste, newdata = leitura) %>%
+  select(-.se.fit, concentracao = .fitted)
+```
+
+
+# Ex - Brix
+
+```{r}
+pacman::p_load(readr, dplyr, ggplot2, car, ExpDes.pt)
+```
+
+
+```{r}
+brix <- read_csv2("dados/brix.csv") %>% 
+  mutate(amostra = as.factor(amostra))
+
+brix
+```
+
+```{r}
+# teste de homogeneidade
+
+leveneTest(brix ~ amostra, data=brix)
+```
+
+```{r}
+# analise de variancia
+
+brix_anova <-  aov(brix ~ amostra, data=brix)
+```
+
+```{r}
+# teste de normalidade
+
+shapiro.test(resid(brix_anova))
+```
+
+```{r}
+summary(brix_anova)
+```
+
+```{r}
+brix_tukey <- HSD.test(brix_anova, "amostra")
+
+brix_tukey
+```
+
+```{r}
+brix_tukey$groups %>% 
+  ggplot(aes(reorder(trt, means, function(x) -mean(x)), means)) +
+    geom_bar(stat = "identity") +
+    geom_text(aes(label = M), vjust = 1.2, size = 6, color = "white") +
+    labs(x = "Tratamentos", "Média") +
+    theme_bw()
+    
+```
+
+```{r}
+with(brix, dic(amostra, brix, quali = T))
+```
+
+# Ex - ICUMSA
+
+```{r}
+pacman::p_load(readr, dplyr, ggplot2, car)
+```
+
+
+```{r}
+icumsa <- read_csv2("dados/icumsa.csv") %>% 
+  mutate_at(vars(amostra, tipo), as.factor) 
+
+icumsa
+```
+
+```{r}
+# teste de homogeneidade
+
+leveneTest(icumsa_leitura ~ tipo + amostra, data = icumsa)
+```
+
+```{r}
+# analise de variancia
+
+icumsa_anova <-  aov(icumsa ~ tipo * amostra, data = icumsa)
+```
+
+```{r}
+# teste de normalidade
+
+shapiro.test(resid(icumsa_anova))
+```
+
+```{r}
+summary(icumsa_anova)
+```
+
+```{r}
+icumsa_tukey_amostra <- HSD.test(icumsa_anova, "amostra")
+
+icumsa_tukey_amostra
+```
+
+```{r}
+icumsa_tukey_amostra$groups %>% 
+  ggplot(aes(reorder(trt, means, function(x) -mean(x)), means)) +
+    geom_bar(stat = "identity") +
+    geom_text(aes(label = M), vjust = 1.2, size = 6, color = "white") +
+    labs(x = "Tratamentos", "Média") +
+    theme_bw()
+```
+
+```{r}
+icumsa_tukey_tipo <- HSD.test(icumsa_anova, "tipo")
+
+icumsa_tukey_tipo
+```
+
+```{r}
+icumsa_tukey_tipo$groups %>% 
+  ggplot(aes(reorder(trt, means, function(x) -mean(x)), means)) +
+    geom_bar(stat = "identity") +
+    geom_text(aes(label = M), vjust = 1.2, size = 6, color = "white") +
+    labs(x = "Tratamentos", "Média") +
+    theme_bw()
+```
+
+# Ex - Microbacia de eucalipto
+
+```{r, message=FALSE}
+pacman::p_load(ggfortify, ggrepel, corrplot)
+pacman::p_load_gh("vqv/ggbiplot")
+```
+
+```{r}
+micro = read_csv2("dados/microbacia.csv")
+
+micro
+```
+
+```{r, message=FALSE, warning= FALSE, fig.width=24, fig.height=24}
+
+corr = cor(select(micro, 5:9))
+corrplot(corr, type="upper", order="original", 
+         tl.col="black", tl.srt=45,
+         tl.cex = 2.8, cl.cex = 2)
+```
+
+
+```{r}
+pca = princomp(select(micro, 5:9), cor = T)
+summary(pca)
+loadings(pca)
+```
+
+```{r, message=FALSE, warning= FALSE, fig.width=20, fig.height=14}
+
+ggbiplot(pca, obs.scale = 1, var.scale = 1, varname.size = 8) +
+ geom_point(size = 8) +
+ geom_vline(xintercept = 0, size = 1.2, linetype = 6) +
+ geom_hline(yintercept = 0, size = 1.2, linetype = 6) +
+ geom_label_repel(aes(label = micro$Microbacia, fill = micro$Clima), size = 8) +
+ guides(fill=guide_legend(title= "Clima")) +
+ theme(legend.position="top") +
+ theme_bw(base_size = 22, base_family = "Helvetica") +
+ theme(panel.background = element_rect(fill = "transparent",colour = NA),
+   plot.background = element_rect(fill = "transparent",colour = NA),
+   legend.background = element_rect(fill = "transparent",colour = NA),
+   legend.key = element_rect(fill = "transparent"),
+   legend.text = element_text(size = rel(1.5)),
+   legend.title = element_text(size = rel(1.5))) +
+    scale_fill_brewer(palette="Pastel2") 
+```
+
+```{r, message=FALSE, warning= FALSE, fig.width=20, fig.height=14}
+
+ggbiplot(pca, obs.scale = 1, var.scale = 1, varname.size = 8) +
+  geom_point(size = 8) +
+  geom_vline(xintercept = 0, size = 1.2, linetype = 6) +
+  geom_hline(yintercept = 0, size = 1.2, linetype = 6) +
+  geom_label_repel(aes(label = micro$Microbacia, fill = micro$Zona), size = 8) +
+  guides(fill=guide_legend(title= "Zona")) +
+  theme(legend.position="top") +
+  theme_bw(base_size = 22, base_family = "Helvetica") +
+  theme(panel.background = element_rect(fill = "transparent",colour = NA),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        legend.background = element_rect(fill = "transparent",colour = NA),
+        legend.key = element_rect(fill = "transparent"),
+        legend.text = element_text(size = rel(1.5)),
+        legend.title = element_text(size = rel(1.5))) +
+  scale_fill_brewer(palette="Pastel2") 
+```
+
+```{r, message=FALSE, warning= FALSE, fig.width=20, fig.height=14}
+ggbiplot(pca, obs.scale = 1, var.scale = 1, varname.size = 8) +
+  geom_point(size = 8) +
+  geom_vline(xintercept = 0, size = 1.2, linetype = 6) +
+  geom_hline(yintercept = 0, size = 1.2, linetype = 6) +
+  geom_label_repel(aes(label = micro$Microbacia, fill = micro$Cultura), size = 8) +
+  guides(fill=guide_legend(title= "Cultura")) +
+  theme(legend.position="top") +
+  theme_bw(base_size = 22, base_family = "Helvetica") +
+  theme(panel.background = element_rect(fill = "transparent",colour = NA),
+    plot.background = element_rect(fill = "transparent",colour = NA),
+    legend.background = element_rect(fill = "transparent",colour = NA),
+    legend.key = element_rect(fill = "transparent"),
+    legend.text = element_text(size = rel(1.5)),
+    legend.title = element_text(size = rel(1.5))) +
+  scale_fill_brewer(palette="Pastel2") 
+```
