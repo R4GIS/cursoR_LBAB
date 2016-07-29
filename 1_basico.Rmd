@@ -12,11 +12,9 @@ Esse grupo mantem o sistema base que possibilita a interação com a linguagem R
 
 O projeto do R teve início com Ross Ihaka e Robert Gentleman nos anos 90 a partir de uma implementação da linguagem S, que foi desenvolvida anos antes por um grupo de pesquisadores liderados por John Chambers no Bell Laboratories. Desde então, o R tem crescido em um ritmo absurdo e pode ser considerado o principal software livre para programação estatística e um dos mais usados no mundo. Não vou listar todas potencialidades do R aqui neste post, em primeiro lugar por que eu não domino todas elas, e segundo por que com certeza o post ficaria muito grande :P. Com o tempo vou apresentar nos posts algumas aplicações pontuais do R com relação aos problemas que precisei resolver. Mas já adianto, é comum dizermos que a pergunta certa sobre uma tarefa no R não é *se podemos fazer*, mas sim *como* podemos fazer.
 
-# Download do R
+# Download do R e RStudio
 
 O download do software R pode ser feito no site do [CRAN](https://www.r-project.org/). Após a instalação você já está apto para iniciar sua análise.
-
-# Download do RStudio
 
 Para trabalharmos em um ambiente com maiores funcionalidade, podemos optar por utilizar um ambiente de desenvolvimento integrado ao R. O [RStudio](https://www.rstudio.com/) é um dos mais utilizados e possui diversas funcionalidades que facilitam nossa vida durante uma análise.
 

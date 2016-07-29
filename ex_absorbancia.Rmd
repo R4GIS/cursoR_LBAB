@@ -8,13 +8,13 @@ p_load(readr, dplyr, ggplot2, ggpmisc, broom, purrr, tidyr)
 ```
 
 ```{r}
-padrao <- read_csv2("./dados/absorbancia_padrao.csv")
+padrao <- read_csv2("dados/absorbancia_padrao.csv")
 
 padrao
 ```
 
 ```{r}
-leitura <- read_csv2("./dados/absorbancia_leitura.csv")
+leitura <- read_csv2("dados/absorbancia_leitura.csv")
 
 leitura
 ```
