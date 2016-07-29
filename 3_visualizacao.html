@@ -178,10 +178,13 @@ $(document).ready(function () {
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">Home</a>
+  <a href="1_basico.html">Introdução</a>
 </li>
 <li>
-  <a href="1_basico.html">Introdução</a>
+  <a href="2_manipulacao.html">Manipulação de dados</a>
+</li>
+<li>
+  <a href="3_visualizacao.html">Visualização</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -201,7 +204,7 @@ $(document).ready(function () {
 
 
 <pre class="r"><code>library(pacman)
-p_load(readr, readxl, dplyr, tidyr, lubridate, ggplot2, ggthemes)</code></pre>
+p_load(readr, readxl, dplyr, tidyr, lubridate, ggplot2, ggthemes, ggpmisc)</code></pre>
 <div id="pontos" class="section level1">
 <h1>Pontos</h1>
 <pre class="r"><code>padrao &lt;- read_csv2(&quot;dados/absorbancia_padrao.csv&quot;)
@@ -220,35 +223,31 @@ padrao</code></pre>
 ## 8      2          0.1       0.060
 ## 9      2          0.2       0.122
 ## 10     2          0.4       0.250</code></pre>
-<pre class="r"><code>leitura &lt;- read_csv2(&quot;./dados/absorbancia_leitura.csv&quot;)
-
-leitura</code></pre>
-<pre><code>## # A tibble: 45 x 4
-##    grupo amotra repeticao absorbancia
-##    &lt;int&gt;  &lt;chr&gt;     &lt;int&gt;       &lt;dbl&gt;
-## 1      1     A1         1       0.545
-## 2      1     A1         2       0.500
-## 3      1     A1         3       0.545
-## 4      1     A2         4       0.589
-## 5      1     A2         5       0.600
-## 6      1     A2         6       0.580
-## 7      1     A3         7       0.520
-## 8      1     A3         8       0.532
-## 9      1     A3         9       0.587
-## 10     1     B1         1       0.780
-## # ... with 35 more rows</code></pre>
+<pre class="r"><code>ggplot(padrao, aes(absorbancia, concentracao)) +
+  geom_point() +
+  facet_wrap(~grupo) +
+  theme_bw()</code></pre>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(padrao, aes(absorbancia, concentracao)) +
   geom_point() +
   geom_smooth(method = &quot;lm&quot;) +
-  facet_wrap(~grupo)</code></pre>
+  facet_wrap(~grupo) +
+  theme_bw()</code></pre>
 <p><img src="3_visualizacao_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(padrao, aes(absorbancia, concentracao)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;) +
+  stat_poly_eq(aes(label = paste(..eq.label.., ..rr.label.., sep = &quot;~~~~&quot;)), formula = y ~ x, parse = TRUE) +
+  facet_wrap(~grupo) +
+  theme_bw()</code></pre>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
 <div id="linhas" class="section level1">
 <h1>Linhas</h1>
-<pre class="r"><code>carne &lt;- read_csv2(&quot;./dados/carne.csv&quot;)
+<pre class="r"><code>carne &lt;- read_csv2(&quot;dados/carne.csv&quot;)
 
 carne_t1 &lt;- carne %&gt;% 
-  gather(ano, ton, 2:12) %&gt;% 
+  gather(ano, ton, 2:dim(.)[2]) %&gt;% 
   mutate(ano = ymd(paste(ano, 01, 01, sep = &quot;-&quot;)))
 
 carne_t1</code></pre>
@@ -266,16 +265,10 @@ carne_t1</code></pre>
 ## 9  exportacao 2007-01-01    832.395
 ## 10   producao 2008-01-01 108540.000
 ## # ... with 23 more rows</code></pre>
-<pre class="r"><code># alternativa flexivel
-carne %&gt;% 
-  gather(ano, ton, 2:dim(.)[2])
-
-# ou ainda 2:dim(.)
-carne %&gt;% 
-  gather(ano, ton, -tipo)</code></pre>
 <pre class="r"><code>carne_t1 %&gt;%
   ggplot(aes(ano, ton, fill = tipo)) +
-    geom_area()</code></pre>
+    geom_area() +
+    theme_bw()</code></pre>
 <p><img src="3_visualizacao_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <pre class="r"><code>carne_t2 &lt;- carne_t1 %&gt;% 
   spread(tipo, ton) %&gt;% 
@@ -296,10 +289,6 @@ carne_t2</code></pre>
 ## 9  2013-01-01   7177.330   87790.19    84011 164623.86
 ## 10 2014-01-01   5892.996   97222.71    79842 171171.72
 ## 11 2015-01-01   9710.259   94022.47        0  84312.21</code></pre>
-<pre class="r"><code>ggplot() +
-  geom_line(data = carne_t2, aes(ano, consumo)) +
-  geom_line(data = carne_t2, aes(ano, producao))</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <pre class="r"><code>carne_t3 &lt;- carne_t2 %&gt;%
   select(ano, producao, consumo) %&gt;% 
   gather(tipo, ton, -ano)
@@ -320,10 +309,11 @@ carne_t3</code></pre>
 ## 10 2014-01-01 producao  79842
 ## # ... with 12 more rows</code></pre>
 <pre class="r"><code>carne_t3 %&gt;% 
-  ggplot(aes(ano, ton, fill = tipo)) +
-    geom_line()</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
-<pre class="r"><code>cafe &lt;- read_csv2(&quot;./dados/cafe.csv&quot;)</code></pre>
+  ggplot(aes(ano, ton, color = tipo)) +
+    geom_line() +
+    theme_bw()</code></pre>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>cafe &lt;- read_csv2(&quot;dados/cafe.csv&quot;)</code></pre>
 <pre class="r"><code>cafe_t1 &lt;- cafe %&gt;% 
   gather(tipo, ton, arabica, robusta, dcaf, conab) %&gt;% 
   mutate(estoque = ifelse(tipo %in% c(&quot;arabica&quot;, &quot;robusta&quot;), &quot;privado&quot;, &quot;governo&quot;))
@@ -345,17 +335,19 @@ cafe_t1</code></pre>
 ## # ... with 38 more rows</code></pre>
 <pre class="r"><code>cafe_t1 %&gt;% 
   ggplot(aes(ano, ton, color = tipo)) +
-    geom_line()</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+    geom_line() +
+    theme_bw()</code></pre>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <pre class="r"><code>cafe_t1 %&gt;% 
   ggplot(aes(ano, ton, color = tipo)) +
     geom_line() +
-    facet_wrap(~estoque, nrow = 2)</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+    facet_wrap(~estoque, nrow = 2) +
+    theme_bw()</code></pre>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 </div>
 <div id="boxplot" class="section level1">
 <h1>Boxplot</h1>
-<pre class="r"><code>dados &lt;- read_csv2(&quot;./dados/base_vespa.csv&quot;)
+<pre class="r"><code>dados &lt;- read_csv2(&quot;dados/base_vespa.csv&quot;)
 
 dados</code></pre>
 <pre><code>## # A tibble: 2,100 x 5
@@ -399,12 +391,12 @@ total</code></pre>
   geom_boxplot() +
   theme_few()</code></pre>
 <pre><code>## Warning: Removed 95 rows containing non-finite values (stat_boxplot).</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(total, aes(Tratamento, Galhas)) +
   geom_boxplot() +
   theme_few()</code></pre>
 <pre><code>## Warning: Removed 95 rows containing non-finite values (stat_boxplot).</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 <pre class="r"><code>local &lt;- dados %&gt;%
   filter(Coleta == 5) %&gt;%
   group_by(Tratamento, Individuo, Local) %&gt;%
@@ -431,9 +423,10 @@ local</code></pre>
 <pre class="r"><code>  ggplot(local, aes(Tratamento, Galhas, fill = Local)) +
   geom_boxplot() +
   theme_few() +
+  theme(legend.position=&quot;top&quot;) +
   scale_fill_brewer(palette = &quot;Spectral&quot;)</code></pre>
 <pre><code>## Warning: Removed 328 rows containing non-finite values (stat_boxplot).</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
 <pre class="r"><code>total_coleta &lt;- dados %&gt;%
   filter(Coleta != 1 ) %&gt;%
   group_by(Tratamento, Coleta, Individuo) %&gt;%
@@ -464,7 +457,7 @@ total_coleta</code></pre>
   theme_few() +
   theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))</code></pre>
 <pre><code>## Warning: Removed 451 rows containing non-finite values (stat_boxplot).</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
 </div>
 <div id="grafico-de-barras" class="section level1">
 <h1>Gráfico de barras</h1>
@@ -491,7 +484,7 @@ total_trat</code></pre>
 <pre class="r"><code>ggplot(total_trat, aes(Tratamento, Galhas)) +
   geom_bar(stat = &quot;identity&quot;) +
   theme_few()</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 <pre class="r"><code>total_trat_local &lt;- dados %&gt;%
   filter(Coleta == 5) %&gt;%
   group_by(Tratamento, Local) %&gt;%
@@ -517,24 +510,26 @@ total_trat_local</code></pre>
 <pre class="r"><code>ggplot(total_trat_local, aes(Tratamento, Galhas, fill = Local)) +
   geom_bar(stat = &quot;identity&quot;) +
   theme_few() +
+  theme(legend.position=&quot;top&quot;) +
   scale_fill_brewer(palette = &quot;Spectral&quot;)</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(total_trat_local, aes(Tratamento, Galhas, fill = Local)) +
   geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
   theme_few() +
+  theme(legend.position=&quot;top&quot;) +
   scale_fill_brewer(palette = &quot;Spectral&quot;)</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(total_trat_local, aes(Tratamento, Galhas )) +
   geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
   facet_wrap(~Local) +
   theme_few() +
   theme(axis.text.x = element_text(angle = 30, hjust = 0.5, vjust = 0.5))</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(total_trat, aes(Tratamento, Galhas)) +
   geom_bar(stat = &quot;identity&quot;) +
   geom_text(aes(label = Galhas), vjust = -0.2) +
   theme_few()</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
 <pre class="r"><code># Cria uma nova coluna que contem a posição no eixo y que corresponde ao centro
 # da barra. Esta posição correnponde ao local onde o label de cada barra
 # será mostrado
@@ -547,16 +542,18 @@ ggplot(total_trat_local_y, aes(Tratamento, Galhas, fill = Local)) +
   geom_bar(stat = &quot;identity&quot;) +
   geom_text(aes(label = Galhas, y = Galhas_y)) +
   theme_few() +
+  theme(legend.position=&quot;top&quot;) +
   scale_fill_brewer(palette = &quot;Spectral&quot;)</code></pre>
 <pre><code>## Warning: Removed 2 rows containing missing values (geom_text).</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(total_trat_local, aes(Tratamento, Galhas, fill = Local)) +
   geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
   geom_text(aes(label = Galhas),
     position = position_dodge(width=0.9), vjust = -0.2) +
   theme_few() +
+  theme(legend.position=&quot;top&quot;) +
   scale_fill_brewer(palette = &quot;Spectral&quot;)</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(total_trat_local, aes(Tratamento, Galhas )) +
   geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
     geom_text(aes(label = Galhas), vjust = -0.2) +
@@ -621,6 +618,7 @@ mediana_trat_local_desv</code></pre>
   geom_errorbar(aes(ymin = Galhas - desv, ymax = Galhas + desv),
     position = position_dodge(width=0.9), width = 0.4) +
   theme_few() +
+  theme(legend.position=&quot;top&quot;) +
   scale_fill_brewer(palette = &quot;Spectral&quot;)</code></pre>
 <pre><code>## Warning: Removed 4 rows containing missing values (geom_errorbar).</code></pre>
 <p><img src="3_visualizacao_files/figure-html/5_bar_local_dodge_desv-1.png" width="672" /></p>
@@ -638,7 +636,7 @@ mediana_trat_local_desv</code></pre>
 <h1>Heatmap</h1>
 <pre class="r"><code>library(pacman)
 p_load(RCurl, readr, dplyr, ggplot2, ggthemes, viridis)</code></pre>
-<pre class="r"><code>dados &lt;-   read_csv2(&quot;./dados/tume0.csv&quot;)
+<pre class="r"><code>dados &lt;-   read_csv2(&quot;dados/tume0.csv&quot;)
 
 # Cria um fator com o atributo para a variável Esp que informa a ordem crescente
 # das espécies em função da altura dominante.
@@ -664,42 +662,42 @@ dados</code></pre>
 ## #   G &lt;dbl&gt;, V &lt;int&gt;, IMA &lt;dbl&gt;, B &lt;int&gt;, Idade &lt;dbl&gt;</code></pre>
 <pre class="r"><code>ggplot(dados, aes(Idade, Hdom, color = Esp)) +
   geom_line(size=1.5) +
-  labs(x = &quot;Idade (anos)&quot;, y = &quot;Altura dominante (m)&quot;) +
+  labs(x = &quot;Idade (anos)&quot;, y = &quot;Altura (m)&quot;) +
   theme_few() +
   scale_color_viridis(name = &quot;Materiais genéticos&quot;,
     direction = -1, discrete = T) +
   guides(col = guide_legend(ncol = 1, reverse = TRUE))</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(dados, aes(factor(Idade), Esp, fill = Hdom)) +
   geom_tile() +
   labs(x = &quot;Idade (anos)&quot;, y = &quot;Materiais genéticos&quot;) +
   theme_few() +
-  scale_fill_viridis(name = &quot;Altura dominante (m)&quot;, direction = -1) +
+  scale_fill_viridis(name = &quot;Altura (m)&quot;, direction = -1) +
   guides(col = guide_legend(reverse = TRUE))</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-36-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(dados, aes(factor(Idade),
        Esp, fill = cut(Hdom, breaks = seq(0, 40, 2)))) +
  geom_tile() +
  labs(x = &quot;Idade (anos)&quot;, y = &quot;Materiais genéticos&quot;) +
  theme_few() +
- scale_fill_viridis(name = &quot;Altura dominante (m)&quot;,
+ scale_fill_viridis(name = &quot;Altura (m)&quot;,
    discrete = T, direction = -1) +
  guides(col = guide_legend(reverse = TRUE))</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-36-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(dados, aes(factor(Idade),
        Esp, fill = cut(Hdom, breaks = seq(0, 40, 2)))) +
  geom_tile() +
  geom_text(aes(label = Hdom), color = &quot;white&quot;) +
  labs(x = &quot;Idade (anos)&quot;, y = &quot;Materiais genéticos&quot;) +
  theme_few() +
- scale_fill_viridis(name = &quot;Altura dominante (m)&quot;,
+ scale_fill_viridis(name = &quot;Altura (m)&quot;,
    discrete = T, direction = -1) +
  guides(col = guide_legend(reverse = TRUE))</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-38-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
 </div>
 <div id="histograma" class="section level1">
 <h1>Histograma</h1>
-<pre class="r"><code>dados &lt;- read_csv2(&quot;./dados/base_amazonia.csv&quot;)
+<pre class="r"><code>dados &lt;- read_csv2(&quot;dados/base_amazonia.csv&quot;)
 
 dados</code></pre>
 <pre><code>## # A tibble: 276 x 7
@@ -721,7 +719,7 @@ dados</code></pre>
   labs(x = &quot;Diâmetro (cm)&quot;, y = &quot;Frequência (arv/ha)&quot;) +
   scale_x_continuous(breaks = seq(0, 100,10)) +
   theme_few()</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(dados, aes(DAP, fill = Comercial)) +
   geom_histogram(binwidth = 10, color = &quot;white&quot;, alpha = 0.5) +
   labs(x = &quot;Diâmetro (cm)&quot;, y = &quot;Frequência (arv/ha)&quot;) +
@@ -729,7 +727,7 @@ dados</code></pre>
   theme_few() +
   theme(legend.position = c(.9, .9)) +
   scale_fill_hue(&quot;Comercial?&quot;, labels = c(&quot;Não&quot;, &quot;Sim&quot;))</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-41-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(dados, aes(Volume, fill = DAP &gt; 50 &amp; Comercial == &quot;Sim&quot;)) +
   geom_histogram(binwidth = 0.5, color = &quot;white&quot;, alpha = 0.5) +
   labs(x =  Volume~individual ~ (m^3 / arv), y = &quot;Frequência (arv/ha)&quot;) +
@@ -738,7 +736,7 @@ dados</code></pre>
   theme_few()  +
   theme(legend.position = c(.9, .9)) +
   scale_fill_hue(&quot;Pode explorar?&quot;, labels = c(&quot;Não&quot;, &quot;Sim&quot;))</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-41-1.png" width="672" /></p>
 <pre class="r"><code>ggplot(dados, aes(Volume, fill = DAP &gt; 50 &amp; Comercial == &quot;Sim&quot;)) +
   geom_histogram(aes(y = ..count../sum(..count..)),
     binwidth = 0.5, color = &quot;white&quot;, alpha = 0.5) +
@@ -748,7 +746,7 @@ dados</code></pre>
   theme_few()  +
   theme(legend.position = c(.9, .9)) +
   scale_fill_hue(&quot;Pode explorar?&quot;, labels = c(&quot;Não&quot;, &quot;Sim&quot;))</code></pre>
-<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-43-1.png" width="672" /></p>
+<p><img src="3_visualizacao_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
 </div>
 
 

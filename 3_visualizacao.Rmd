@@ -4,7 +4,7 @@ title: "Visualização"
 
 ```{r}
 library(pacman)
-p_load(readr, readxl, dplyr, tidyr, lubridate, ggplot2, ggthemes)
+p_load(readr, readxl, dplyr, tidyr, lubridate, ggplot2, ggthemes, ggpmisc)
 ```
 
 
@@ -17,45 +17,46 @@ padrao
 ```
 
 ```{r}
-leitura <- read_csv2("./dados/absorbancia_leitura.csv")
-
-leitura
+ggplot(padrao, aes(absorbancia, concentracao)) +
+  geom_point() +
+  facet_wrap(~grupo) +
+  theme_bw()
 ```
 
 ```{r}
 ggplot(padrao, aes(absorbancia, concentracao)) +
   geom_point() +
   geom_smooth(method = "lm") +
-  facet_wrap(~grupo)
+  facet_wrap(~grupo) +
+  theme_bw()
 ```
 
+```{r}
+ggplot(padrao, aes(absorbancia, concentracao)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  stat_poly_eq(aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~~")), formula = y ~ x, parse = TRUE) +
+  facet_wrap(~grupo) +
+  theme_bw()
+```
 
 # Linhas
 
 ```{r}
-carne <- read_csv2("./dados/carne.csv")
+carne <- read_csv2("dados/carne.csv")
 
 carne_t1 <- carne %>% 
-  gather(ano, ton, 2:12) %>% 
+  gather(ano, ton, 2:dim(.)[2]) %>% 
   mutate(ano = ymd(paste(ano, 01, 01, sep = "-")))
 
 carne_t1
 ```
 
-```{r eval=FALSE}
-# alternativa flexivel
-carne %>% 
-  gather(ano, ton, 2:dim(.)[2])
-
-# ou ainda 2:dim(.)
-carne %>% 
-  gather(ano, ton, -tipo)
-```
-
 ```{r}
 carne_t1 %>%
   ggplot(aes(ano, ton, fill = tipo)) +
-    geom_area()
+    geom_area() +
+    theme_bw()
 ```
 
 ```{r}
@@ -64,12 +65,6 @@ carne_t2 <- carne_t1 %>%
   mutate(consumo = importacao + producao - exportacao)
 
 carne_t2
-```
-
-```{r}
-ggplot() +
-  geom_line(data = carne_t2, aes(ano, consumo)) +
-  geom_line(data = carne_t2, aes(ano, producao))
 ```
 
 ```{r}
@@ -82,12 +77,13 @@ carne_t3
 
 ```{r}
 carne_t3 %>% 
-  ggplot(aes(ano, ton, fill = tipo)) +
-    geom_line()
+  ggplot(aes(ano, ton, color = tipo)) +
+    geom_line() +
+    theme_bw()
 ```
 
 ```{r}
-cafe <- read_csv2("./dados/cafe.csv")
+cafe <- read_csv2("dados/cafe.csv")
 ```
 
 ```{r}
@@ -97,24 +93,27 @@ cafe_t1 <- cafe %>%
 
 cafe_t1
 ```
+
 ```{r}
 cafe_t1 %>% 
   ggplot(aes(ano, ton, color = tipo)) +
-    geom_line()
+    geom_line() +
+    theme_bw()
 ```
 
 ```{r}
 cafe_t1 %>% 
   ggplot(aes(ano, ton, color = tipo)) +
     geom_line() +
-    facet_wrap(~estoque, nrow = 2)
+    facet_wrap(~estoque, nrow = 2) +
+    theme_bw()
 ```
 
 
 # Boxplot
 
 ```{r}
-dados <- read_csv2("./dados/base_vespa.csv")
+dados <- read_csv2("dados/base_vespa.csv")
 
 dados
 ```
@@ -155,6 +154,7 @@ local
   ggplot(local, aes(Tratamento, Galhas, fill = Local)) +
   geom_boxplot() +
   theme_few() +
+  theme(legend.position="top") +
   scale_fill_brewer(palette = "Spectral")
 ```
 
@@ -212,6 +212,7 @@ total_trat_local
 ggplot(total_trat_local, aes(Tratamento, Galhas, fill = Local)) +
   geom_bar(stat = "identity") +
   theme_few() +
+  theme(legend.position="top") +
   scale_fill_brewer(palette = "Spectral")
 ```
 
@@ -219,6 +220,7 @@ ggplot(total_trat_local, aes(Tratamento, Galhas, fill = Local)) +
 ggplot(total_trat_local, aes(Tratamento, Galhas, fill = Local)) +
   geom_bar(stat = "identity", position = "dodge") +
   theme_few() +
+  theme(legend.position="top") +
   scale_fill_brewer(palette = "Spectral")
 ```
 
@@ -250,6 +252,7 @@ ggplot(total_trat_local_y, aes(Tratamento, Galhas, fill = Local)) +
   geom_bar(stat = "identity") +
   geom_text(aes(label = Galhas, y = Galhas_y)) +
   theme_few() +
+  theme(legend.position="top") +
   scale_fill_brewer(palette = "Spectral")
 ```
 
@@ -259,6 +262,7 @@ ggplot(total_trat_local, aes(Tratamento, Galhas, fill = Local)) +
   geom_text(aes(label = Galhas),
     position = position_dodge(width=0.9), vjust = -0.2) +
   theme_few() +
+  theme(legend.position="top") +
   scale_fill_brewer(palette = "Spectral")
 ```
 
@@ -312,6 +316,7 @@ ggplot(mediana_trat_local_desv, aes(Tratamento, Galhas, fill = Local)) +
   geom_errorbar(aes(ymin = Galhas - desv, ymax = Galhas + desv),
     position = position_dodge(width=0.9), width = 0.4) +
   theme_few() +
+  theme(legend.position="top") +
   scale_fill_brewer(palette = "Spectral")
 ```
 
@@ -333,7 +338,7 @@ p_load(RCurl, readr, dplyr, ggplot2, ggthemes, viridis)
 ```
 
 ```{r}
-dados <-   read_csv2("./dados/tume0.csv")
+dados <-   read_csv2("dados/tume0.csv")
 
 # Cria um fator com o atributo para a variável Esp que informa a ordem crescente
 # das espécies em função da altura dominante.
@@ -347,7 +352,7 @@ dados
 ```{r}
 ggplot(dados, aes(Idade, Hdom, color = Esp)) +
   geom_line(size=1.5) +
-  labs(x = "Idade (anos)", y = "Altura dominante (m)") +
+  labs(x = "Idade (anos)", y = "Altura (m)") +
   theme_few() +
   scale_color_viridis(name = "Materiais genéticos",
     direction = -1, discrete = T) +
@@ -359,7 +364,7 @@ ggplot(dados, aes(factor(Idade), Esp, fill = Hdom)) +
   geom_tile() +
   labs(x = "Idade (anos)", y = "Materiais genéticos") +
   theme_few() +
-  scale_fill_viridis(name = "Altura dominante (m)", direction = -1) +
+  scale_fill_viridis(name = "Altura (m)", direction = -1) +
   guides(col = guide_legend(reverse = TRUE))
 ```
 
@@ -369,7 +374,7 @@ ggplot(dados, aes(factor(Idade),
  geom_tile() +
  labs(x = "Idade (anos)", y = "Materiais genéticos") +
  theme_few() +
- scale_fill_viridis(name = "Altura dominante (m)",
+ scale_fill_viridis(name = "Altura (m)",
    discrete = T, direction = -1) +
  guides(col = guide_legend(reverse = TRUE))
 ```
@@ -381,7 +386,7 @@ ggplot(dados, aes(factor(Idade),
  geom_text(aes(label = Hdom), color = "white") +
  labs(x = "Idade (anos)", y = "Materiais genéticos") +
  theme_few() +
- scale_fill_viridis(name = "Altura dominante (m)",
+ scale_fill_viridis(name = "Altura (m)",
    discrete = T, direction = -1) +
  guides(col = guide_legend(reverse = TRUE))
 ```
@@ -390,7 +395,7 @@ ggplot(dados, aes(factor(Idade),
 # Histograma
 
 ```{r}
-dados <- read_csv2("./dados/base_amazonia.csv")
+dados <- read_csv2("dados/base_amazonia.csv")
 
 dados
 ```

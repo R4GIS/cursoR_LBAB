@@ -27,37 +27,24 @@ Faça o download do RStudio nesse [link](https://www.rstudio.com/products/rstudi
 
 ```{r}
 10 + 2 - 3 
-```
 
-```{r}
 50 * 10
-```
 
-```{r}
 40 / 3
 ```
 
 ```{r}
 5^2
-```
 
-```{r}
 64^(1/2)
-```
 
-```{r}
 sqrt(64)
 ```
 
-```{r}
-4^-1
-```
 
 ```{r}
 log(10)
-```
 
-```{r}
 exp(x = 1)
 ```
 
@@ -72,7 +59,7 @@ class(x)
 ```
 
 ```{r warning=FALSE}
-#install.packages(libridate)
+#install.packages(lubridate)
 library(lubridate)
 
 x2 <- dmy(x)

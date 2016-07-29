@@ -11,7 +11,7 @@
 
 
 
-<title>Manipulação</title>
+<title>Manipulação de dados</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -178,10 +178,13 @@ $(document).ready(function () {
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">Home</a>
+  <a href="1_basico.html">Introdução</a>
 </li>
 <li>
-  <a href="1_basico.html">Introdução</a>
+  <a href="2_manipulacao.html">Manipulação de dados</a>
+</li>
+<li>
+  <a href="3_visualizacao.html">Visualização</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -195,16 +198,14 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Manipulação</h1>
+<h1 class="title toc-ignore">Manipulação de dados</h1>
 
 </div>
 
 
-<div id="manipulacao-de-data-frame" class="section level1">
-<h1>Manipulação de data frame</h1>
 <pre class="r"><code>#install.packages(&quot;pacman&quot;)
 library(pacman)
-p_load(readr, readxl, dplyr, tidyr, lubridate, nycflights13)
+p_load(dplyr, nycflights13)
 
 #?flights
 
@@ -226,7 +227,6 @@ flights</code></pre>
 ## #   arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;, tailnum &lt;chr&gt;,
 ## #   origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;, hour &lt;dbl&gt;,
 ## #   minute &lt;dbl&gt;, time_hour &lt;time&gt;</code></pre>
-</div>
 <div id="filter" class="section level1">
 <h1>Filter</h1>
 <p>Com a função <code>filter()</code> é possível selecionar linhas específicas, de acordo com o fator que deseja. Podem ser usados um ou vários fatores de seleção.</p>
@@ -577,7 +577,10 @@ delay</code></pre>
 </div>
 <div id="exemplo-dados-producao-de-carne" class="section level1">
 <h1>Exemplo dados produção de carne</h1>
-<pre class="r"><code>carne &lt;- read_csv2(&quot;dados/carne.csv&quot;)
+<pre class="r"><code>library(pacman)
+p_load(readr, lubridate, tidyr)
+
+carne &lt;- read_csv2(&quot;dados/carne.csv&quot;)
 
 carne</code></pre>
 <pre><code>## # A tibble: 3 x 12

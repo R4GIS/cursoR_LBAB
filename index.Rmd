@@ -1,5 +1,28 @@
 ---
-title: "Curso R"
+title: "Curso R - LBAB/ESALQ"
 ---
 
-Hello, Website!
+É com grande satisfação que esperamos vocês para o nosso treinamento. Lembramos que o curso "Introdução ao software R" será iniciado amanhã (28/07/16) às 9h, na sala 1, no LAN 2 (prédio do Açúcar e Álcool) (haverá indicação na porta da sala).
+
+Dia 1 - Introdução a linguagem R e manipulação de dados
+
+*  Principais características do R e RStudio
+*  Comandos básicos
+*  Tipos de objetos
+*  Conceito tidydata
+*  Manipulação de dados em tabelas
+
+Dia 2 - Visualização e testes estatísticos
+
+* Tipos de gráficos
+* Introdução ao pacote ggplot2
+* ANOVA
+* Teste Tukey
+* Análise de agrupamento
+  
+
+Bom evento a todos!
+
+Att.,
+
+Equipe LBAB e Ítalo Cegatta
