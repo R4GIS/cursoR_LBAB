@@ -186,6 +186,9 @@ $(document).ready(function () {
 <li>
   <a href="3_visualizacao.html">Visualização</a>
 </li>
+<li>
+  <a href="4_testes_estatisticos.html">Testes estatisticos</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -207,9 +210,14 @@ $(document).ready(function () {
 p_load(readr, readxl, dplyr, tidyr, lubridate, ggplot2, ggthemes, ggpmisc)</code></pre>
 <div id="pontos" class="section level1">
 <h1>Pontos</h1>
-<pre class="r"><code>padrao &lt;- read_csv2(&quot;dados/absorbancia_padrao.csv&quot;)
-
-padrao</code></pre>
+<pre class="r"><code>padrao &lt;- read_csv2(&quot;dados/absorbancia_padrao.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   grupo = col_integer(),
+##   concentracao = col_double(),
+##   absorbancia = col_double()
+## )</code></pre>
+<pre class="r"><code>padrao</code></pre>
 <pre><code>## # A tibble: 10 x 3
 ##    grupo concentracao absorbancia
 ##    &lt;int&gt;        &lt;dbl&gt;       &lt;dbl&gt;
@@ -244,9 +252,23 @@ padrao</code></pre>
 </div>
 <div id="linhas" class="section level1">
 <h1>Linhas</h1>
-<pre class="r"><code>carne &lt;- read_csv2(&quot;dados/carne.csv&quot;)
-
-carne_t1 &lt;- carne %&gt;% 
+<pre class="r"><code>carne &lt;- read_csv2(&quot;dados/carne.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   tipo = col_character(),
+##   `2005` = col_double(),
+##   `2006` = col_double(),
+##   `2007` = col_double(),
+##   `2008` = col_double(),
+##   `2009` = col_double(),
+##   `2010` = col_double(),
+##   `2011` = col_double(),
+##   `2012` = col_double(),
+##   `2013` = col_double(),
+##   `2014` = col_double(),
+##   `2015` = col_double()
+## )</code></pre>
+<pre class="r"><code>carne_t1 &lt;- carne %&gt;% 
   gather(ano, ton, 2:dim(.)[2]) %&gt;% 
   mutate(ano = ymd(paste(ano, 01, 01, sep = &quot;-&quot;)))
 
@@ -314,6 +336,14 @@ carne_t3</code></pre>
     theme_bw()</code></pre>
 <p><img src="3_visualizacao_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 <pre class="r"><code>cafe &lt;- read_csv2(&quot;dados/cafe.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   ano = col_integer(),
+##   arabica = col_number(),
+##   robusta = col_number(),
+##   dcaf = col_character(),
+##   conab = col_number()
+## )</code></pre>
 <pre class="r"><code>cafe_t1 &lt;- cafe %&gt;% 
   gather(tipo, ton, arabica, robusta, dcaf, conab) %&gt;% 
   mutate(estoque = ifelse(tipo %in% c(&quot;arabica&quot;, &quot;robusta&quot;), &quot;privado&quot;, &quot;governo&quot;))
@@ -321,7 +351,7 @@ carne_t3</code></pre>
 cafe_t1</code></pre>
 <pre><code>## # A tibble: 48 x 4
 ##      ano    tipo   ton estoque
-##    &lt;int&gt;   &lt;chr&gt; &lt;dbl&gt;   &lt;chr&gt;
+##    &lt;int&gt;   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt;
 ## 1   2004 arabica  7723 privado
 ## 2   2005 arabica 10872 privado
 ## 3   2006 arabica  9278 privado
@@ -343,10 +373,19 @@ cafe_t1</code></pre>
     geom_line() +
     facet_wrap(~estoque, nrow = 2) +
     theme_bw()</code></pre>
+<pre><code>## geom_path: Each group consists of only one observation. Do you need to
+## adjust the group aesthetic?</code></pre>
 <p><img src="3_visualizacao_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
-<pre class="r"><code>ferm &lt;- read_csv2(&quot;dados/fermentacao.csv&quot;)
-
-ferm</code></pre>
+<pre class="r"><code>ferm &lt;- read_csv2(&quot;dados/fermentacao.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   composicao = col_character(),
+##   dia = col_integer(),
+##   repeticao = col_integer(),
+##   fermentacao = col_double(),
+##   ph = col_double()
+## )</code></pre>
+<pre class="r"><code>ferm</code></pre>
 <pre><code>## # A tibble: 96 x 5
 ##    composicao   dia repeticao fermentacao    ph
 ##         &lt;chr&gt; &lt;int&gt;     &lt;int&gt;       &lt;dbl&gt; &lt;dbl&gt;
@@ -369,9 +408,16 @@ ferm</code></pre>
 </div>
 <div id="boxplot" class="section level1">
 <h1>Boxplot</h1>
-<pre class="r"><code>dados &lt;- read_csv2(&quot;dados/base_vespa.csv&quot;)
-
-dados</code></pre>
+<pre class="r"><code>dados &lt;- read_csv2(&quot;dados/base_vespa.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   Tratamento = col_character(),
+##   Individuo = col_integer(),
+##   Coleta = col_integer(),
+##   Local = col_character(),
+##   Galhas = col_integer()
+## )</code></pre>
+<pre class="r"><code>dados</code></pre>
 <pre><code>## # A tibble: 2,100 x 5
 ##    Tratamento Individuo Coleta   Local Galhas
 ##         &lt;chr&gt;     &lt;int&gt;  &lt;int&gt;   &lt;chr&gt;  &lt;int&gt;
@@ -658,9 +704,26 @@ mediana_trat_local_desv</code></pre>
 <h1>Heatmap</h1>
 <pre class="r"><code>library(pacman)
 p_load(RCurl, readr, dplyr, ggplot2, ggthemes, viridis)</code></pre>
-<pre class="r"><code>dados &lt;-   read_csv2(&quot;dados/tume0.csv&quot;)
-
-# Cria um fator com o atributo para a variável Esp que informa a ordem crescente
+<pre class="r"><code>dados &lt;-   read_csv2(&quot;dados/tume0.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   N_tume = col_integer(),
+##   Esp = col_character(),
+##   I_meses = col_integer(),
+##   Parc_m2 = col_double(),
+##   DAPmed = col_double(),
+##   DAPsd = col_double(),
+##   Hmed = col_double(),
+##   Hsd = col_double(),
+##   Hdom = col_double(),
+##   N_fuste = col_integer(),
+##   Sobr = col_double(),
+##   G = col_double(),
+##   V = col_integer(),
+##   IMA = col_double(),
+##   B = col_integer()
+## )</code></pre>
+<pre class="r"><code># Cria um fator com o atributo para a variável Esp que informa a ordem crescente
 # das espécies em função da altura dominante.
 
 dados &lt;- dados %&gt;% 
@@ -719,9 +782,18 @@ dados</code></pre>
 </div>
 <div id="histograma" class="section level1">
 <h1>Histograma</h1>
-<pre class="r"><code>dados &lt;- read_csv2(&quot;dados/base_amazonia.csv&quot;)
-
-dados</code></pre>
+<pre class="r"><code>dados &lt;- read_csv2(&quot;dados/base_amazonia.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   Especie = col_character(),
+##   Nome_cientifico = col_character(),
+##   Comercial = col_character(),
+##   DAP = col_integer(),
+##   HCom = col_integer(),
+##   Volume = col_double(),
+##   QF = col_integer()
+## )</code></pre>
+<pre class="r"><code>dados</code></pre>
 <pre><code>## # A tibble: 276 x 7
 ##             Especie              Nome_cientifico Comercial   DAP  HCom
 ##               &lt;chr&gt;                        &lt;chr&gt;     &lt;chr&gt; &lt;int&gt; &lt;int&gt;

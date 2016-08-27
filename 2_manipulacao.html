@@ -186,6 +186,9 @@ $(document).ready(function () {
 <li>
   <a href="3_visualizacao.html">Visualização</a>
 </li>
+<li>
+  <a href="4_testes_estatisticos.html">Testes estatisticos</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -580,9 +583,23 @@ delay</code></pre>
 <pre class="r"><code>library(pacman)
 p_load(readr, lubridate, tidyr)
 
-carne &lt;- read_csv2(&quot;dados/carne.csv&quot;)
-
-carne</code></pre>
+carne &lt;- read_csv2(&quot;dados/carne.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   tipo = col_character(),
+##   `2005` = col_double(),
+##   `2006` = col_double(),
+##   `2007` = col_double(),
+##   `2008` = col_double(),
+##   `2009` = col_double(),
+##   `2010` = col_double(),
+##   `2011` = col_double(),
+##   `2012` = col_double(),
+##   `2013` = col_double(),
+##   `2014` = col_double(),
+##   `2015` = col_double()
+## )</code></pre>
+<pre class="r"><code>carne</code></pre>
 <pre><code>## # A tibble: 3 x 12
 ##         tipo       2005       2006       2007       2008       2009
 ##        &lt;chr&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
@@ -666,25 +683,32 @@ carne_t2</code></pre>
 </div>
 <div id="exemplo-dados-estoque-de-cafe" class="section level1">
 <h1>Exemplo dados estoque de café</h1>
-<pre class="r"><code>cafe &lt;- read_csv2(&quot;dados/cafe.csv&quot;)
-
-cafe %&gt;% 
+<pre class="r"><code>cafe &lt;- read_csv2(&quot;dados/cafe.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   ano = col_integer(),
+##   arabica = col_number(),
+##   robusta = col_number(),
+##   dcaf = col_character(),
+##   conab = col_number()
+## )</code></pre>
+<pre class="r"><code>cafe %&gt;% 
   mutate(ano = ymd(paste(ano, 01, 01, sep = &quot;-&quot;)))</code></pre>
 <pre><code>## # A tibble: 12 x 5
-##           ano arabica robusta    dcaf   conab
-##        &lt;date&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
-## 1  2004-01-01    7723  783.00 4290.00  454.00
-## 2  2005-01-01   10872 1172.00 3191.00  182.00
-## 3  2006-01-01    9278  446.00 1949.00  182.00
-## 4  2007-01-01   16781  803.00  704.00  182.00
-## 5  2008-01-01   11490 1013.00  521.00  178.00
-## 6  2009-01-01   14005  651.00  494.00  616.00
-## 7  2010-01-01    8245  699.00  506.00 1648.00
-## 8  2011-01-01    8233 1005.00  487.00 1615.00
-## 9  2012-01-01    7722  693.00   33.42 1614.56
-## 10 2013-01-01   12366 1572.00   33.42 1619.66
-## 11 2014-01-01   14163 1055.00   33.42 1619.66
-## 12 2015-01-01   12983 1386.03    0.00 1573.81</code></pre>
+##           ano arabica robusta     dcaf   conab
+##        &lt;date&gt;   &lt;dbl&gt;   &lt;dbl&gt;    &lt;chr&gt;   &lt;dbl&gt;
+## 1  2004-01-01    7723  783.00 4.290,00  454.00
+## 2  2005-01-01   10872 1172.00 3.191,00  182.00
+## 3  2006-01-01    9278  446.00 1.949,00  182.00
+## 4  2007-01-01   16781  803.00   704,00  182.00
+## 5  2008-01-01   11490 1013.00   521,00  178.00
+## 6  2009-01-01   14005  651.00   494,00  616.00
+## 7  2010-01-01    8245  699.00   506,00 1648.00
+## 8  2011-01-01    8233 1005.00   487,00 1615.00
+## 9  2012-01-01    7722  693.00    33,42 1614.56
+## 10 2013-01-01   12366 1572.00    33,42 1619.66
+## 11 2014-01-01   14163 1055.00    33,42 1619.66
+## 12 2015-01-01   12983 1386.03        - 1573.81</code></pre>
 <pre class="r"><code>cafe_t1 &lt;- cafe %&gt;% 
   gather(tipo, ton, arabica, robusta, dcaf, conab) %&gt;% 
   mutate(estoque = ifelse(tipo %in% c(&quot;arabica&quot;, &quot;robusta&quot;), &quot;privado&quot;, &quot;governo&quot;))
@@ -692,7 +716,7 @@ cafe %&gt;%
 cafe_t1</code></pre>
 <pre><code>## # A tibble: 48 x 4
 ##      ano    tipo   ton estoque
-##    &lt;int&gt;   &lt;chr&gt; &lt;dbl&gt;   &lt;chr&gt;
+##    &lt;int&gt;   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt;
 ## 1   2004 arabica  7723 privado
 ## 2   2005 arabica 10872 privado
 ## 3   2006 arabica  9278 privado

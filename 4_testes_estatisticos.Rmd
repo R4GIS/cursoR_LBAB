@@ -2,15 +2,10 @@
 title: "Testes Estatísticos"
 ---
 
-```{r}
-pacman::p_load(readr, dplyr, tidyr, ggplot2, car, agricolae, ExpDes.pt)
-```
-
 # Ex - Curva padrão
 
-```{r setup}
-library(pacman)
-p_load(readr, dplyr, ggplot2, ggpmisc, broom, purrr, tidyr)
+```{r}
+pacman::p_load(readr, dplyr, tidyr, broom, ggplot2, car, agricolae, ExpDes.pt)
 ```
 
 ```{r}
@@ -149,13 +144,14 @@ icumsa
 ```{r}
 # teste de homogeneidade
 
-leveneTest(icumsa_leitura ~ tipo + amostra, data = icumsa)
+leveneTest(icumsa_leitura ~ tipo, data = icumsa)
+leveneTest(icumsa_leitura ~ amostra, data = icumsa)
 ```
 
 ```{r}
 # analise de variancia
 
-icumsa_anova <-  aov(icumsa ~ tipo * amostra, data = icumsa)
+icumsa_anova <-  aov(icumsa_leitura ~ tipo + amostra, data = icumsa)
 ```
 
 ```{r}
@@ -246,7 +242,6 @@ ggbiplot(pca, obs.scale = 1, var.scale = 1, varname.size = 8) +
 ```
 
 ```{r, message=FALSE, warning= FALSE, fig.width=20, fig.height=14}
-
 ggbiplot(pca, obs.scale = 1, var.scale = 1, varname.size = 8) +
   geom_point(size = 8) +
   geom_vline(xintercept = 0, size = 1.2, linetype = 6) +
